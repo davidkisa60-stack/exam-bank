@@ -1,0 +1,20 @@
+body {
+  font-family: sans-serif;
+  margin: 20px;
+}
+
+#controls {
+  margin-bottom: 20px;
+}
+
+#controls label {
+  margin-right: 10px;
+}
+
+#questionsSection, #examSection {
+  margin-top: 20px;
+}
+
+.question-item {
+  margin-bottom: 8px;
+}

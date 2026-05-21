@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Question Bank Exam Builder</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <h1>Question Bank Exam Builder</h1>
+
+  <div id="controls">
+    <label>
+      Subject:
+      <select id="subjectSelect">
+        <option value="">--Select--</option>
+      </select>
+    </label>
+
+    <label>
+      Topic:
+      <select id="topicSelect">
+        <option value="">--Select--</option>
+      </select>
+    </label>
+
+    <button id="loadQuestionsBtn">Load questions</button>
+  </div>
+
+  <div id="questionsSection">
+    <h2>Questions</h2>
+    <div id="questionsList"></div>
+  </div>
+
+  <div id="examSection">
+    <h2>Exam preview</h2>
+    <button id="generateExamBtn">Generate preview</button>
+    <pre id="examPreview"></pre>
+  </div>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:8000";  // local FastAPI for now
+  </script>
+  <script src="main.js"></script>
+</body>
+</html>
