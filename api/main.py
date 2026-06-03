@@ -1,42 +1,45 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-import json
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+import json
 
 app = FastAPI()
 
-# Allow future frontend (Netlify) to call this API
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # later we'll restrict this to your Netlify URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# --- Paths ---
+# BASE_DIR: repo root (.. from api/)
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-DATA_FILE = Path(__file__).parent / "questions.json"
+QUESTIONS_PATH = BASE_DIR / "api" / "questions.json"
+PAGE_IMAGES_DIR = BASE_DIR / "extractor" / "output" / "page_images"
 
-with open(DATA_FILE, "r", encoding="utf-8") as f:
-    QUESTIONS = json.load(f)
+# --- Static media mount ---
+if PAGE_IMAGES_DIR.exists():
+    app.mount("/media", StaticFiles(directory=str(PAGE_IMAGES_DIR)), name="media")
 
-@app.get("/subjects")
-def get_subjects():
-    subjects = sorted({q["subject"] for q in QUESTIONS})
-    return subjects
 
-@app.get("/topics")
-def get_topics(subject: str | None = None):
-    if subject:
-        topics = sorted({q["topic"] for q in QUESTIONS if q["subject"] == subject})
-    else:
-        topics = sorted({q["topic"] for q in QUESTIONS})
-    return topics
+@app.get("/")
+def read_root():
+    return {"status": "ok", "message": "Exam bank API running"}
+
 
 @app.get("/questions")
-def get_questions(subject: str | None = None, topic: str | None = None):
-    results = QUESTIONS
-    if subject:
-        results = [q for q in results if q["subject"] == subject]
-    if topic:
-        results = [q for q in results if q["topic"] == topic]
-    return results
+def get_questions(request: Request):
+    """
+    Return all questions from questions.json.
+    Each question may include a 'media' array.
+    For image-like media ('image' or 'page_image'), attach a full URL.
+    """
+    base_url = str(request.base_url).rstrip("/")
+
+    with open(QUESTIONS_PATH, "r", encoding="utf-8") as f:
+        questions = json.load(f)
+
+    for q in questions:
+        media_list = q.get("media", [])
+        for m in media_list:
+            m_type = m.get("type")
+            fname = m.get("file")
+            if m_type in ("image", "page_image") and fname:
+                m["url"] = f"{base_url}/media/{fname}"
+
+    return questions
