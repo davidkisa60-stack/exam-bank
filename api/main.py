@@ -5,6 +5,21 @@ import json
 
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+origins = [
+    "http://localhost:5173",                 # dev
+    "https://exams-banks1.netlify.app",      # your Netlify site
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # --- Paths ---
 # BASE_DIR: repo root (.. from api/)
 BASE_DIR = Path(__file__).resolve().parent.parent
